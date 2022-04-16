@@ -97,7 +97,7 @@ while True:
         if reserve_token_1 > 0 and reserve_token_2 > 0:
             option1 = reserve_token_2/reserve_token_1
             option11 = reserve_token_1/reserve_token_2
-
+            
 
             #Seems good pour l'instant comme calcul
             calcul_mc_option1 = ((1/option1) * resultat) * (totalSupply2/10**decimals_1) 
@@ -126,7 +126,7 @@ while True:
         reserve_token_1, reserve_token_2, _ = contract2.functions.getReserves().call()
      
 
-        #faire le calcul pour déterminer le nombre de tokens précis dans la pool 
+        #faire le calcul pour déterminer le nombre de tokens précis dans la pool @
         nb_token1_pool = reserve_token_1/10**decimals_0
         nb_token2_pool = reserve_token_2/10**decimals_1
         print("nombre token1 pool:", nb_token1_pool)
