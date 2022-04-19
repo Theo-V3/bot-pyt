@@ -80,25 +80,21 @@ while True:
 
         print("Token 1 ",  token_0, "\n" "Token 2 ", token_1)
 
+
         #OPTION 1:
         #calculer le ratio des tokens dans la pool pour définir le marketcap:
         # hypothèse : nombre de token0/nombre d'avax = ratio de token / avax --> résultat > 1 --> 1/résultat 
         # --> multiplication du nombre de token0/avax par le prix de l'avax
         #then multipication par le totalSupply/10**decimales du token0
-
-        if token_0 == "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7":
-            option1 = reserve_token_2/reserve_token_1
-            
-                   
-        elif token_1 == "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7":
-            option11 = reserve_token_1/reserve_token_2
-            
-                     
         if reserve_token_1 > 0 and reserve_token_2 > 0:
             option1 = reserve_token_2/reserve_token_1
             option11 = reserve_token_1/reserve_token_2
-            
 
+            if token_0 == "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7":
+                option1 = reserve_token_2/reserve_token_1
+            elif token_1 == "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7":
+                option11 = reserve_token_1/reserve_token_2
+            
             #Seems good pour l'instant comme calcul
             calcul_mc_option1 = ((1/option1) * resultat) * (totalSupply2/10**decimals_1) 
             calcul_mc_option11 = ((1/option11) * resultat) * (totalSupply/10**decimals_0)   
@@ -106,9 +102,28 @@ while True:
             print("Mcap option 1:", calcul_mc_option1,"\n" "Mcap option 11", calcul_mc_option11)
         
         else :
-            print("paire vide")
+            print("Paire vide")
+
+        if reserve_token_1 > 0 and reserve_token_2 > 0:
+            option2 = reserve_token_2/reserve_token_1
+            option22 = reserve_token_1/reserve_token_2
+
+            if token_0 == "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E" or "0xc7198437980c041c805A1EDcbA50c1Ce5db95118" or "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70" or "0x130966628846BFd36ff31a822705796e8cb8C18D":
+                option2 = reserve_token_2/reserve_token_1
+            elif token_1 == "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E" or "0xc7198437980c041c805A1EDcbA50c1Ce5db95118":
+                option22 = reserve_token_1/reserve_token_2
+
+            calcul_mc_option2 = (option2 * (totalSupply2/10**decimals_1))
+            calcul_mc_option22 = (option22 * (totalSupply/10**decimals_0))
+            
+            print("Mcap option 2:", calcul_mc_option1,"\n" "Mcap option 22", calcul_mc_option11)
         
-        
+            
+        else :
+            print("Paire vide (stables)")
+                
+
+   
         #se co à l'api de coinpaprica pour request des infos sur prix/mc/totalsupply
         response = requests.get("https://api.coinpaprika.com/v1/ticker/avax-avalanche") 
         result = response.json()  
@@ -116,7 +131,14 @@ while True:
         resultat = float(result["price_usd"])
         
         #Send message on telegram
-        message = "New pair : {}/{} \nTo buy: https://traderjoexyz.com/trade?outputCurrency={}&inputCurrency={} \n({}/{})" .format(contract3.functions.symbol().call(), contract4.functions.symbol().call(), token_0, token_1, contract3.functions.name().call(), contract4.functions.name().call(), resultat)
+        message = "New pair : {}/{} \nTo buy: https://traderjoexyz.com/trade?outputCurrency={}&inputCurrency={} \n({}/{})" .format(
+            contract3.functions.symbol().call(), 
+            contract4.functions.symbol().call(), 
+            token_0, token_1, contract3.functions.name().call(), 
+            contract4.functions.name().call(), 
+            resultat
+        )
+        
         message2 = "\nMarket cap : {:,}$".format(resultat)
         
         test = bot.send_message("-1001660580072", message + message2)
@@ -131,12 +153,10 @@ while True:
         nb_token2_pool = reserve_token_2/10**decimals_1
         print("nombre token1 pool:", nb_token1_pool)
         print("nombre token2 pool:", nb_token2_pool)
-        
-    
-        #OPTION 2:
-        #nombre de token0/nombre de stable(usdt/mim/usdc/dai/frax) = ratio de token / nb de stable dans la pool
-        #then multiplication par le totalSupply du token0
-        option2 = reserve_token_2/reserve_token_1
-        calcul_mc_option2 = (1/option2) * (totalSupply/10**decimals_0)
-        print(calcul_mc_option2)
 
+        
+
+        url = requests.get("https://api.dexscreener.io/latest/dex/search?q=WBNB%20USDC")
+        response = url.json()
+        print(response.pairs[0].priceUsd)
+            

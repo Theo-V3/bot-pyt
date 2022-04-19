@@ -66,7 +66,15 @@ while True:
         resultat = float(result["price_usd"])
         
         #Send message on telegram
-        message = "New pair : {}/{} \nTo buy: https://traderjoexyz.com/trade?outputCurrency={}&inputCurrency={} \n({}/{})" .format(contract3.functions.symbol().call(), contract4.functions.symbol().call(), token_0, token_1, contract3.functions.name().call(), contract4.functions.name().call(), resultat)
+        message = "New pair : {}/{} \nTo buy: https://traderjoexyz.com/trade?outputCurrency={}&inputCurrency={} \n({}/{})" .format(
+            contract3.functions.symbol().call(),
+            contract4.functions.symbol().call(),
+            token_0, token_1,
+            contract3.functions.name().call(),
+            contract4.functions.name().call(), 
+            resultat
+            
+        )
         message2 = "\nMarket cap : {:,}$".format(resultat)
         
         test = bot.send_message("-1001660580072", message + message2)
@@ -109,5 +117,12 @@ while True:
         #nombre de token0/nombre de stable(usdt/mim/usdc/dai/frax) = ratio de token / nb de stable dans la pool
         #then multiplication par le totalSupply du token0
         option2 = reserve_token_1/reserve_token_2
+        calcul_mc_option2 = (1/option2) * (totalSupply/10**decimals_0)
+        print(calcul_mc_option2)
+
+        #OPTION 2:
+        #nombre de token0/nombre de stable(usdt/mim/usdc/dai/frax) = ratio de token / nb de stable dans la pool
+        #then multiplication par le totalSupply du token0
+        option2 = reserve_token_2/reserve_token_1
         calcul_mc_option2 = (1/option2) * (totalSupply/10**decimals_0)
         print(calcul_mc_option2)
