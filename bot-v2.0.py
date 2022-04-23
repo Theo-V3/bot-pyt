@@ -1,6 +1,6 @@
+from doctest import NORMALIZE_WHITESPACE
 import json
-from lib2to3.pgen2 import token
-from tokenize import Token
+from symtable import Symbol
 from eth_utils import to_checksum_address
 from web3 import Web3
 import telebot
@@ -54,7 +54,7 @@ while True:
         class Token():
             def __init__(self, name, symbol, decimals, address, totalSupply):
                 self.name = name
-                self.symbol = symbol
+                self.symbol = symbol.replace(" ","")
                 self.decimals = decimals
                 self.address = address
                 self.totalSupply = totalSupply
@@ -82,6 +82,34 @@ while True:
                 #on détermine si on veut le token 0 ou le token 1
                 if pair["token0"].lower() in knownTokens :
                     #on regarde le prix du token en avax
-                    url = requests.get("https://api.dexscreener.io/latest/dex/tokens/0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7")
+                    url = requests.get("https://api.dexscreener.io/latest/dex/tokens/{}".format(pair["token1"]))
                     response = url.json()
-                    print(response.pairs[0].priceUsd)
+                    resultPriceToken = response["pairs"][0]["priceUsd"]
+                    resultLiquidityToken = response["pairs"][0]["liquidity"]["quote"]
+                    resultLiquidityAvax = response["pairs"][0]["liquidity"]["base"]
+                    resultLiquidityUsd = response["pairs"][0]["liquidity"]["usd"]
+                    print(resultLiquidityAvax)
+
+                elif pair["token1"].lower() in knownTokens :
+                    url = requests.get("https://api.dexscreener.io/latest/dex/tokens/{}".format(pair["token1"]))
+                    response = url.json()
+                    resultPriceToken = response["pairs"][0]["priceUsd"]
+                    resultLiquidityToken = response["pairs"][0]["liquidity"]["quote"]
+                    resultLiquidityAvax = response["pairs"][0]["liquidity"]["base"]
+                    resultLiquidityUsd = response["pairs"][0]["liquidity"]["usd"]
+                else :
+                    pair["NewTokenMCap"] = "Pas de token connus pour déterminer le Mcap"
+            else :
+                pair["NewTokenMCap"] = "Pas de liquidité pour déterminer le Mcap"
+
+            return "New pair : {}/{} \nTo buy: https://traderjoexyz.com/trade?outputCurrency={}&inputCurrency={} \n({}/{})" .format(
+                pair["token0"].symbol,
+                pair["token1"].symbol,
+                pair["token0"].address,
+                pair["token1"].addresse,
+                pair["token0"].name,
+                pair["token1"].name,
+            )
+        print(whenNewPair("0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664"))
+
+                

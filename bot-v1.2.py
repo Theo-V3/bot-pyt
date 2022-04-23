@@ -154,9 +154,11 @@ while True:
         print("nombre token1 pool:", nb_token1_pool)
         print("nombre token2 pool:", nb_token2_pool)
 
+    
         
-
-        url = requests.get("https://api.dexscreener.io/latest/dex/search?q=WBNB%20USDC")
+        url = requests.get("https://api.dexscreener.io/latest/dex/tokens/{}".format(token_1))
         response = url.json()
-        print(response.pairs[0].priceUsd)
+        print(response["pairs"][0]["priceUsd"])
+        print(response["pairs"][0]["liquidity"]["quote"])
+        
             
