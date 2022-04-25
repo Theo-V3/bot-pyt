@@ -1,4 +1,3 @@
-from doctest import NORMALIZE_WHITESPACE
 import json
 from symtable import Symbol
 from eth_utils import to_checksum_address
@@ -6,6 +5,7 @@ from web3 import Web3
 import telebot
 import requests
 from unicodedata import name
+import time
 
 avalanche_url = "https://api.avax.network/ext/bc/C/rpc"
 web3 = Web3(Web3.HTTPProvider(avalanche_url))
@@ -19,6 +19,10 @@ with open ("ABItoken.json") as f:
 
 addresse = "0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10"
 contract1 = web3.eth.contract(abi=abi, address=addresse)
+
+#configurer et créer le bot --> avec son token 
+bot = telebot.TeleBot('5134546712:AAENre6G1HRSBHFwLIqPuJtj0GuoH5MBqDU')
+bot.config['api_key'] = "5134546712:AAENre6G1HRSBHFwLIqPuJtj0GuoH5MBqDU"
 
 previousPaires = 0
 while True:
@@ -61,11 +65,14 @@ while True:
             def __str__(self):
                 return "{}".format(self.symbol)
     
+        time.sleep(3)
 
         def whenNewPair(pairAddress):
             pair = {
                 "token0":"",
                 "token1":"",
+                "reserve0":"",
+                "reserve1":"",
                 "NewTokenMCap":"",
             }
             pairSC = web3.eth.contract(abi=abiPaires,address=web3.toChecksumAddress(pairAddress))
@@ -80,18 +87,16 @@ while True:
             #si la pool a été initialisée
             if pair["reserve0"] > 0 and pair["reserve1"] > 0 :
                 #on détermine si on veut le token 0 ou le token 1
-                if pair["token0"].lower() in knownTokens :
+                if pair["token0"].address.lower() in knownTokens :
                     #on regarde le prix du token en avax
-                    url = requests.get("https://api.dexscreener.io/latest/dex/tokens/{}".format(pair["token1"]))
+                    url = requests.get("https://api.dexscreener.io/latest/dex/tokens/{}".format(pair["token1"].address))
                     response = url.json()
                     resultPriceToken = response["pairs"][0]["priceUsd"]
                     resultLiquidityToken = response["pairs"][0]["liquidity"]["quote"]
                     resultLiquidityAvax = response["pairs"][0]["liquidity"]["base"]
-                    resultLiquidityUsd = response["pairs"][0]["liquidity"]["usd"]
-                    print(resultLiquidityAvax)
-
-                elif pair["token1"].lower() in knownTokens :
-                    url = requests.get("https://api.dexscreener.io/latest/dex/tokens/{}".format(pair["token1"]))
+                    resultLiquidityUsd = response["pairs"][0]["liquidity"]["usd"]                 
+                elif pair["token1"].address.lower() in knownTokens :
+                    url = requests.get("https://api.dexscreener.io/latest/dex/tokens/{}".format(pair["token0"].address))
                     response = url.json()
                     resultPriceToken = response["pairs"][0]["priceUsd"]
                     resultLiquidityToken = response["pairs"][0]["liquidity"]["quote"]
@@ -101,15 +106,30 @@ while True:
                     pair["NewTokenMCap"] = "Pas de token connus pour déterminer le Mcap"
             else :
                 pair["NewTokenMCap"] = "Pas de liquidité pour déterminer le Mcap"
+                resultPriceToken = "Indisponible"
+                resultLiquidityToken = "Pas de liquidité"
+                resultLiquidityAvax = "Pas de liquidité"
+                resultLiquidityUsd = "N/a"
 
-            return "New pair : {}/{} \nTo buy: https://traderjoexyz.com/trade?outputCurrency={}&inputCurrency={} \n({}/{})" .format(
+            return "New pair : {}/{} \nTo buy: https://traderjoexyz.com/trade?outputCurrency={}&inputCurrency={} \n({}/{}) \n \n💰 Prix: {}$ \n🚜 Liquidité Token: {} \n🔺 Liquidité Avax ou Stables: {} \n💸 Liquidité totale: {}$" .format(
                 pair["token0"].symbol,
                 pair["token1"].symbol,
                 pair["token0"].address,
-                pair["token1"].addresse,
+                pair["token1"].address,
                 pair["token0"].name,
                 pair["token1"].name,
+                resultPriceToken,
+                resultLiquidityAvax,
+                resultLiquidityToken,
+                resultLiquidityUsd,
             )
-        print(whenNewPair("0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664"))
 
-                
+        print(whenNewPair(AddressPaires))
+
+        message = bot.send_message("-1001660580072", whenNewPair(AddressPaires))
+    
+    tx = {
+        "chainId",
+    }
+        
+        
