@@ -1,4 +1,7 @@
+from asyncio.log import logger
 import json
+from symtable import Symbol
+from eth_account import Account
 from eth_utils import to_checksum_address
 from web3 import Web3
 import telebot
@@ -63,6 +66,7 @@ while True:
                 self.totalSupply = totalSupply
             def __str__(self):
                 return "{}".format(self.symbol)
+    
 
         def whenNewPair(pairAddress):
             pair = {
@@ -88,34 +92,20 @@ while True:
                     #on regarde le prix du token en avax
                     url = requests.get("https://api.dexscreener.io/latest/dex/tokens/{}".format(pair["token1"].address))
                     response = url.json()
-                    if len(response["pairs"]) > 0 :
-                        time.sleep(5)
-                        resultPriceToken = response["pairs"][0]["priceUsd"]
-                        resultLiquidityToken = response["pairs"][0]["liquidity"]["quote"]
-                        resultLiquidityAvax = response["pairs"][0]["liquidity"]["base"]
-                        resultLiquidityUsd = response["pairs"][0]["liquidity"]["usd"]
-                    else:
-                        resultPriceToken = "Aucune informations disponibles"
-                        resultLiquidityToken = "Aucune informations disponibles"
-                        resultLiquidityAvax = "Aucune informations disponibles"
-                        resultLiquidityUsd = "Aucune informations disponibles" 
-         
-                elif pair["token1"].address.lower() in knownTokens :
                     
-                        url = requests.get("https://api.dexscreener.io/latest/dex/tokens/{}".format(pair["token0"].address))
-                        response = url.json()
-                        if len(response["pairs"]) > 0 :  
-                            time.sleep(5)      
-                            resultPriceToken = response["pairs"][0]["priceUsd"]
-                            resultLiquidityToken = response["pairs"][0]["liquidity"]["quote"]
-                            resultLiquidityAvax = response["pairs"][0]["liquidity"]["base"]
-                            resultLiquidityUsd = response["pairs"][0]["liquidity"]["usd"]
-                        else:
-                            resultPriceToken = "Aucune informations disponibles"
-                            resultLiquidityToken = "Aucune informations disponibles"
-                            resultLiquidityAvax = "Aucune informations disponibles"
-                            resultLiquidityUsd = "Aucune informations disponibles"
-                        
+                    resultPriceToken = response["pairs"][0]["priceUsd"]
+                    resultLiquidityToken = response["pairs"][0]["liquidity"]["quote"]
+                    resultLiquidityAvax = response["pairs"][0]["liquidity"]["base"]
+                    resultLiquidityUsd = response["pairs"][0]["liquidity"]["usd"]      
+                               
+                elif pair["token1"].address.lower() in knownTokens :
+                    url = requests.get("https://api.dexscreener.io/latest/dex/tokens/{}".format(pair["token0"].address))
+                    response = url.json()
+                    
+                    resultPriceToken = response["pairs"][0]["priceUsd"]
+                    resultLiquidityToken = response["pairs"][0]["liquidity"]["quote"]
+                    resultLiquidityAvax = response["pairs"][0]["liquidity"]["base"]
+                    resultLiquidityUsd = response["pairs"][0]["liquidity"]["usd"]
                 else :
                     pair["NewTokenMCap"] = "Pas de token connus pour déterminer le Mcap"
             else :
@@ -125,7 +115,7 @@ while True:
                 resultLiquidityAvax = "Pas de liquidité"
                 resultLiquidityUsd = "N/a"
 
-            return "New pair : {}/{} \nTo buy: https://traderjoexyz.com/trade?outputCurrency={}&inputCurrency={} \n({}/{}) \n \n💰 Prix: {} \n🚜 Liquidité Token: {} \n🔺 Liquidité Avax ou Stables: {} \n💸 Liquidité totale: {}" .format(
+            return "New pair : {}/{} \nTo buy: https://traderjoexyz.com/trade?outputCurrency={}&inputCurrency={} \n({}/{}) \n \n💰 Prix: {}$ \n🚜 Liquidité Token: {} \n🔺 Liquidité Avax ou Stables: {} \n💸 Liquidité totale: {}$" .format(
                 pair["token0"].symbol,
                 pair["token1"].symbol,
                 pair["token0"].address,
@@ -140,19 +130,7 @@ while True:
 
         print(whenNewPair(AddressPaires))
 
-
-        message = bot.send_message("-1001660580072", whenNewPair(AddressPaires))
-
-        account1 = web3.toChecksumAddress("0x6C123CeC63c2e449D3fDA6ac013922A7a5c79373")
-        account2 = web3.toChecksumAddress("0x60ae616a2155ee3d9a68541ba4544862310933d4")
-        with open ("AprivateKey.txt") as f:
-            Private_Key = f.read()
-        
-        def isHoney(tokenAddress, routerAddress, address=""):
-            tx = {
-                'nonce': web3.eth.get_block_transaction_count(tokenAddress),
-                'chainId': 43114,
-                'gasPrice': web3.eth.gas_price
-            }
-            
-        
+    
+    logger.debug(whenNewPair)  # will print a message to the console
+    logger.info(whenNewPair)    
+    
