@@ -79,5 +79,3 @@ while True:
 
             if pair["reserve0"] > 0 and pair["reserve1"] > 0 :
                 if pair["token0"].address.lower() in knownTokens :
-
-

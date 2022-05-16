@@ -43,7 +43,9 @@ while True:
         "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7", #USDT
         "0xd586e7f844cea2f87f50152665bcbc2c279d8d70", #DAI.E
         "0x130966628846bfd36ff31a822705796e8cb8c18d", #MIM
-        "0xb599c3590f42f8f995ecfa0f85d2980b76862fc1"  #UST
+        "0xb599c3590f42f8f995ecfa0f85d2980b76862fc1", #UST
+        "0x111111111111ed1d73f860f57b2798b683f2d325", #YUSD
+        "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB", #WETH.e
         ]
 
         def initToken(tokenAddress):
@@ -85,7 +87,7 @@ while True:
             pair["reserve0"], pair["reserve1"], _ = pairSC.functions.getReserves().call()
 
             #si la pool a été initialisée
-            if pair["reserve0"] > 0 and pair["reserve1"] > 0 :
+            if pair["reserve0"] > 0 and pair["reserve1"] > 0 :      
                 #on détermine si on veut le token 0 ou le token 1
                 if pair["token0"].address.lower() in knownTokens :
                     #on regarde le prix du token en avax
@@ -98,7 +100,10 @@ while True:
                         resultLiquidityAvax = response["pairs"][0]["liquidity"]["base"]
                         resultLiquidityUsd = response["pairs"][0]["liquidity"]["usd"]  
                     else:
-                        print("Pas d'infos sur le token")  
+                        resultPriceToken = "Aucune informations disponibles"
+                        resultLiquidityToken = "Aucune informations disponibles"
+                        resultLiquidityAvax = "Aucune informations disponibles"
+                        resultLiquidityUsd = "Aucune informations disponibles" 
                                      
                 elif pair["token1"].address.lower() in knownTokens :
                     
@@ -106,12 +111,15 @@ while True:
                         response = url.json()
                         if len(response["pairs"]) > 0 :  
                             time.sleep(5)      
-                            resultPriceToken = response["pairs"][0]["priceUsd"]
+                            resultPriceToken = response["pairs"][0]["priceUsd"] 
                             resultLiquidityToken = response["pairs"][0]["liquidity"]["quote"]
                             resultLiquidityAvax = response["pairs"][0]["liquidity"]["base"]
                             resultLiquidityUsd = response["pairs"][0]["liquidity"]["usd"]
                         else:
-                            print("Pas d'infos sur le token")
+                            resultPriceToken = "Aucune informations disponibles"
+                            resultLiquidityToken = "Aucune informations disponibles"
+                            resultLiquidityAvax = "Aucune informations disponibles"
+                            resultLiquidityUsd = "Aucune informations disponibles"
                 else :
                     pair["NewTokenMCap"] = "Pas de token connus pour déterminer le Mcap"
             else :
@@ -135,17 +143,6 @@ while True:
             )
 
         print(whenNewPair(AddressPaires))
+
         message = bot.send_message("-1001660580072", whenNewPair(AddressPaires))
 
-
-        account1 = web3.toChecksumAddress("0x6C123CeC63c2e449D3fDA6ac013922A7a5c79373")
-        account2 = web3.toChecksumAddress("0x60ae616a2155ee3d9a68541ba4544862310933d4")
-        with open ("AprivateKey.txt") as f:
-            Private_Key = f.read()
-
-        def isHoney(tokenAddress, routerAddress, address=""):
-            tx = {
-                'nonce': web3.eth.get_block_transaction_count(tokenAddress),
-                'chainId': 43114,
-                'gasPrice': web3.eth.gas_price
-            }
