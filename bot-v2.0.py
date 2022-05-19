@@ -41,7 +41,6 @@ while True:
         "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7", #USDT
         "0xd586e7f844cea2f87f50152665bcbc2c279d8d70", #DAI.E
         "0x130966628846bfd36ff31a822705796e8cb8c18d", #MIM
-        "0xb599c3590f42f8f995ecfa0f85d2980b76862fc1"  #UST
         ]
 
         def initToken(tokenAddress):
@@ -129,8 +128,8 @@ while True:
             else :
                 pair["NewTokenMCap"] = "Pas de liquidité pour déterminer le Mcap"
                 resultPriceToken = "Indisponible"
-                resultLiquidityToken = "Pas de liquidité"
-                resultLiquidityAvax = "Pas de liquidité"
+                resultLiquidityToken = "N/a"
+                resultLiquidityAvax = "N/a"
                 resultLiquidityUsd = "N/a"
 
             return "New pair : {}/{} \nTo buy: https://traderjoexyz.com/trade?outputCurrency={}&inputCurrency={} \n({}/{}) \n \n💰 Prix: {}$ \n🚜 Liquidité Token: {} \n🔺 Liquidité Avax ou Stables: {} \n💸 Liquidité totale: {}$" .format(
@@ -147,10 +146,10 @@ while True:
             )
 
         print(whenNewPair(AddressPaires))
-
-
         message = bot.send_message("-1001660580072", whenNewPair(AddressPaires))
 
+
+        #Fonction Liquidity
         def liquidity(pairAddress):
             pairSC = web3.eth.contract(abi=abiPaires,address=web3.toChecksumAddress(pairAddress))
             pair = {
@@ -161,31 +160,54 @@ while True:
             }
             pair["token0"] = initToken(pairSC.functions.token0().call())
             pair["token1"] = initToken(pairSC.functions.token1().call())
-
             pair["reserve0"], pair["reserve1"], _ = pairSC.functions.getReserves().call()
 
             if pair["token0"].address.lower() in knownTokens :
                 pair["token1"].totalSupply
                 pair["token1"].decimals
                 pair["reserve1"]
-                return "Total supply token : {} \nReserve token : {} \n{}" .format(
+                return "Total supply token : {} \nReserve token : {}" .format(
                     pair["token1"].totalSupply / 10 ** pair["token1"].decimals,
-                    pair["reserve1"],
-                    pair["token1"].decimals,
+                    pair["reserve1"] / 10 ** pair["token1"].decimals,
                 )
-                    
-                         
+                                           
             elif pair["token1"].address.lower() in knownTokens :
                 pair["token0"].totalSupply
                 pair["token0"].decimals
                 pair["reserve0"]
-                return "\n Total supply token : {} \n Reserve token : {} \n {}" .format(
+                return "\n Total supply token : {} \n Reserve token : {}" .format(
                     pair["token0"].totalSupply / 10 ** pair["token0"].decimals,
-                    pair["reserve0"],
-                    pair["token0"].decimals,
+                    pair["reserve0"] / 10 ** pair["token0"].decimals,
                 )
             else : 
-                print("osef deux fois")                   
+                print("osef ") 
         print(liquidity(AddressPaires))
-        
+
+
+       
+        #Fonction Token
+        def token(pairAddress):
+            pairSC = web3.eth.contract(abi=abiPaires,address=web3.toChecksumAddress(pairAddress))
+            pair = {
+                "token0":"",
+                "token1":"",
+            }
+            pair["token0"] = initToken(pairSC.functions.token0().call())
+            pair["token1"] = initToken(pairSC.functions.token1().call())
+
+            if pair["token0"].address.lower() in knownTokens:
+                print(pair["token1"].address)
+            elif pair["token1"].address.lower() in knownTokens:
+                print(pair["token0"].address)
+
+        token(AddressPaires)
+
+
+        pairSC = web3.eth.contract(abi=abiPaires,address=web3.toChecksumAddress(AddressPaires))
+        symbol = {
+            "BTC":"",
+            "AVAX":"",
+            "ETH":"",
+            "SPORE":""
+        }
         
